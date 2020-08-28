@@ -19,6 +19,67 @@ namespace EnumComparedByEqualsAnalyzer.Test
         }
 
         [TestMethod]
+        public void Nameof_NoResults()
+        {
+            var test = @"
+    using System;
+
+    namespace ConsoleApplication1
+    {
+        class TypeName
+        {   
+            public TypeName(string y)
+            {
+                var x = nameof(y);
+            }
+        }
+    }";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+
+        [TestMethod]
+        public void MoreArguments_NoResults()
+        {
+            var test = @"
+    using System;
+
+    namespace ConsoleApplication1
+    {
+        class TypeName
+        {   
+            public TypeName()
+            {
+                var x = "".Equals("", StringComparison.Ordinal);
+            }
+        }
+    }";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+        public void CustomEquals_NoResults()
+        {
+            var test = @"
+    using System;
+
+    namespace ConsoleApplication1
+    {
+        class TypeName
+        {   
+            public TypeName()
+            {
+var y = new TypeName();
+                var x = y.Equals(StringSplitOptions.None);
+            }
+        }
+    }";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+        [TestMethod]
         public void SingleDiagnostic_AssignmentReplaceEqualsWithOpEq()
         {
             var test = @"
@@ -39,7 +100,7 @@ namespace EnumComparedByEqualsAnalyzer.Test
             {
                 Id = "EnumComparedByEqualsAnalyzer",
                 Message = String.Format("Replace '{0}' with '=='", "x.Equals"),
-                Severity = DiagnosticSeverity.Warning,
+                Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
                             new DiagnosticResultLocation("Test0.cs", 11, 25)

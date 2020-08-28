@@ -28,13 +28,15 @@ namespace EnumComparedByEqualsAnalyzer
         private static void AnalyzeSymbol(SyntaxNodeAnalysisContext context)
         {
             var invocation = context.Node as InvocationExpressionSyntax;
-            if ((invocation.Expression as MemberAccessExpressionSyntax).Name.Identifier.ValueText != "Equals" || invocation.ArgumentList.Arguments.Count != 1)
+            if ((invocation.Expression is MemberAccessExpressionSyntax memAccess) && memAccess.Name.Identifier.ValueText != "Equals" || invocation.ArgumentList.Arguments.Count != 1)
                 return;
 
             var methodSymbol = context
                                 .SemanticModel
                                 .GetSymbolInfo(invocation)
                                 .Symbol as IMethodSymbol;
+            if (methodSymbol is null)
+                return; //nameof Expression matches this.
             if (methodSymbol.ReturnType?.SpecialType != SpecialType.System_Boolean || methodSymbol.Parameters.SingleOrDefault()?.Type.SpecialType != SpecialType.System_Object)
                 return;
             if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
