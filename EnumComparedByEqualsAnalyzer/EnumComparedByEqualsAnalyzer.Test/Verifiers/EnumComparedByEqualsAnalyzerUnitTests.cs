@@ -111,6 +111,37 @@ var y = new TypeName();
         }
 
         [TestMethod]
+        public void SingleDiagnostic_ClassMemberAssignmentReplaceEqualsWithOpEq()
+        {
+            var test = @"
+    using System;
+
+    namespace ConsoleApplication1
+    {
+        class TypeName
+        {   
+            StringSplitOptions x = StringSplitOptions.None;
+            public TypeName()
+            {
+                var y = x.Equals(StringSplitOptions.RemoveEmptyEntries);
+            }
+        }
+    }";
+            var expected = new DiagnosticResult
+            {
+                Id = "EnumComparedByEqualsAnalyzer",
+                Message = String.Format("Replace '{0}' with '=='", "x.Equals"),
+                Severity = DiagnosticSeverity.Error,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 11, 25)
+                        }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [TestMethod]
         public void SingleDiagnostic_ComparisonReplaceEqualsWithOpEq()
         {
             var test = @"
